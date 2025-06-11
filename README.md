@@ -1,5 +1,5 @@
 
-## install guid
+## install guide
 	- add a file named .env in root
 	- add the following in this file: GEMINI_API_KEY="your api key"
 	- run command: `python3 -m venv venv`
