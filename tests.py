@@ -1,7 +1,7 @@
 # tests.py
 
 import unittest
-from functions.get_files_info import get_files_info, get_file_content, write_file
+from functions.get_files_info import get_files_info, get_file_content, write_file, run_python_file
 
 class TestFilesInfo(unittest.TestCase):
 	def test_get_files_info(self):
@@ -36,6 +36,16 @@ class TestFilesInfo(unittest.TestCase):
 		# print(b)
 		# print(c)
 		pass
+	def test_run_python_file(self):
+		a = run_python_file("calculator", "main.py")
+		b = run_python_file("calculator", "tests.py")
+		c = run_python_file("calculator", "../main.py")
+		d = run_python_file("calculator", "nonexistent.py")
+
+		print(a)
+		print(b)
+		print(c)
+		print(d)
 		
 		
 if __name__ == "__main__":

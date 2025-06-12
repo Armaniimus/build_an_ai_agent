@@ -1,4 +1,5 @@
 import os
+import subprocess
 def get_files_info(working_directory, directory=None):
 	try:
 		absolute_working_directory = os.path.abspath(working_directory)
@@ -29,7 +30,7 @@ def get_files_info(working_directory, directory=None):
 
 		return message
 	except Exception as argument:
-		print(f"Error: {argument}")
+		return(f"Error: {argument}")
 
 def get_file_content(working_directory, file_path):
 	try:
@@ -53,7 +54,7 @@ def get_file_content(working_directory, file_path):
 			file_content_string += f'[...File "{file_path}" truncated at 10000 characters]'
 		return file_content_string
 	except Exception as argument:
-		print(f"Error: {argument}")
+		return(f"Error: {argument}")
 
 def write_file(working_directory, file_path, content):
 	try:
@@ -74,6 +75,39 @@ def write_file(working_directory, file_path, content):
 		f.write(content)
 		f.close()
 
-		print(f'Successfully wrote to "{file_path}" ({len(content)} characters written)')
+		return(f'Successfully wrote to "{file_path}" ({len(content)} characters written)')
 	except Exception as argument:
-		print(f"Error: {argument}")
+		return(f"Error: {argument}")
+
+def run_python_file(working_directory, file_path):
+	absolute_working_directory = os.path.abspath(working_directory)
+	joined_path = os.path.join(working_directory, file_path)
+	absolute_file = os.path.abspath(joined_path)
+
+	if not os.path.isdir(absolute_working_directory):
+		return f'Error: "{working_directory}" is not a directory'
+	elif not os.path.isfile(absolute_file):
+		return f'Error: File "{file_path}" not found.'
+	elif not absolute_file.startswith(absolute_working_directory):
+		return f'Error: Cannot execute "{file_path}" as it is outside the permitted working directory'
+	elif not absolute_file.endswith(".py"):
+		return f'Error: "{file_path}" is not a Python file.'
+
+
+	try: 
+		subproces = subprocess.run(["python", absolute_file], timeout=30, capture_output=True)
+
+		stdout = f"STDOUT: {subproces.stdout}"
+		stderr = f"STDERR: {subproces.stderr}"
+		output = f"{stdout}\n{stderr}\n"
+
+		if not subproces.returncode == 0:
+			output += f"Process exited with code {subproces.returncode}\n"
+		
+		if (subproces.stdout + subproces.stderr == b''):
+			output += "No output produced.\n"
+
+		return(output)
+
+	except Exception as e:
+		return(f"Error: executing Python file: {e}")
