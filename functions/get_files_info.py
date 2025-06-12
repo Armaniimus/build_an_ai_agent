@@ -32,22 +32,48 @@ def get_files_info(working_directory, directory=None):
 		print(f"Error: {argument}")
 
 def get_file_content(working_directory, file_path):
-	absolute_working_directory = os.path.abspath(working_directory)
-	joined_path = os.path.join(working_directory, file_path)
-	absolute_file = os.path.abspath(joined_path)
+	try:
+		absolute_working_directory = os.path.abspath(working_directory)
+		joined_path = os.path.join(working_directory, file_path)
+		absolute_file = os.path.abspath(joined_path)
 
-	if not os.path.isdir(absolute_working_directory):
-		return f'Error: "{working_directory}" is not a directory'
-	elif not os.path.isfile(absolute_file):
-		return f'Error: File not found or is not a regular file: "{file_path}"'
-	elif not absolute_file.startswith(absolute_working_directory):
-		return f'Error: Cannot read "{file_path}" as it is outside the permitted working directory'
+		if not os.path.isdir(absolute_working_directory):
+			return f'Error: "{working_directory}" is not a directory'
+		elif not os.path.isfile(absolute_file):
+			return f'Error: File not found or is not a regular file: "{file_path}"'
+		elif not absolute_file.startswith(absolute_working_directory):
+			return f'Error: Cannot read "{file_path}" as it is outside the permitted working directory'
+		
+		MAX_CHARS = 10000
+		f = open(absolute_file, "r")
+		file_content_string = f.read(MAX_CHARS)
+		f.close()
+
+		if len(file_content_string) == MAX_CHARS:
+			file_content_string += f'[...File "{file_path}" truncated at 10000 characters]'
+		return file_content_string
+	except Exception as argument:
+		print(f"Error: {argument}")
+
+def write_file(working_directory, file_path, content):
+	try:
+		absolute_working_directory = os.path.abspath(working_directory)
+		joined_path = os.path.join(working_directory, file_path)
+		absolute_file = os.path.abspath(joined_path)
+
+		if not os.path.isdir(absolute_working_directory):
+			return f'Error: "{working_directory}" is not a directory'
+		elif not absolute_file.startswith(absolute_working_directory):
+			return f'Error: Cannot write to "{file_path}" as it is outside the permitted working directory'
 	
-	MAX_CHARS = 10000
-	f = open(absolute_file, "r")
-	file_content_string = f.read(MAX_CHARS)
-	f.close()
+		parentfile = os.path.split(absolute_file)
+		if not os.path.exists(parentfile[0]):
+			os.makedirs(parentfile[0])
+		
+		f = open(absolute_file, "w")
+		f.write(content)
+		f.close()
 
-	if len(file_content_string) == MAX_CHARS:
-		file_content_string += f'[...File "{file_path}" truncated at 10000 characters]'
-	return file_content_string
+		print(f'Successfully wrote to "{file_path}" ({len(content)} characters written)')
+	except Exception as argument:
+		print(f"Error: {argument}")
