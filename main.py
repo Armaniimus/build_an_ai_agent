@@ -22,7 +22,7 @@ def main():
 		for func in function_calls:
 			print(f"Calling function: {func.name}({func.args})")
 
-	print(response.text)
+	else: print(response.text)
 
 def print_verbose(user_prompt, response):
 	meta = response.usage_metadata
