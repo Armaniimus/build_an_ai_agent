@@ -24,8 +24,16 @@ def generate_content(user_prompt, response, is_verbose):
 	function_calls = response.function_calls
 	if function_calls != None:
 		for func in function_calls:
-			out = call_function(func.name, func.args, is_verbose)
-			print(out)
+			res = call_function(func.name, func.args, is_verbose)
+			
+
+			if res.parts[0].function_response.response != None:
+				if is_verbose: 
+					print(f"-> {res.parts[0].function_response.response}")
+			
+			else:
+				message = f"function {func.name}() failed to deliver the expected results."
+				raise Exception(message)
 	else: print(response.text)
 
 	
@@ -47,9 +55,25 @@ def call_function(func_name, arguments, verbose=False):
 	elif func_name == "run_python_file":
 		output = run_python_file(**arguments)
 	else:
-		output = "Error: non valid function was called"	
+		return types.Content(
+			role="tool",
+			parts=[
+				types.Part.from_function_response(
+					name=func_name,
+					response={"error": f"Unknown function: {func_name}"},
+				)
+			],
+		)
 	
-	return output
+	return types.Content(
+		role="tool",
+		parts=[
+			types.Part.from_function_response(
+				name=func_name,
+				response={"result": output},
+			)
+		],
+	)
 
 def print_verbose(user_prompt, response):
 	meta = response.usage_metadata
