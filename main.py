@@ -1,9 +1,10 @@
 import os
-import sys
 import argparse
+from functions.functions import get_files_info, get_file_content, write_file, run_python_file
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
+
 
 
 def main():
@@ -13,16 +14,42 @@ def main():
 
 	client = get_client()
 	response = get_response(client, user_prompt, system_prompt, available_functions)
-
+	
+	generate_content(user_prompt, response, is_verbose)
+	
+			
+def generate_content(user_prompt, response, is_verbose):
 	if is_verbose:
 		print_verbose(user_prompt, response)
-
 	function_calls = response.function_calls
 	if function_calls != None:
 		for func in function_calls:
-			print(f"Calling function: {func.name}({func.args})")
-
+			out = call_function(func.name, func.args, is_verbose)
+			print(out)
 	else: print(response.text)
+
+	
+
+def call_function(func_name, arguments, verbose=False):
+	arguments["working_directory"] = "./calculator"
+	# working_dir = "./calculator"
+	if verbose:
+		print(f"Calling function: {func_name}({arguments})")
+	else:
+		print(f" - Calling function: {func_name}")
+
+	if func_name == "get_files_info":
+		output = get_files_info(**arguments)
+	elif func_name == "get_file_content":
+		output = get_file_content(**arguments)
+	elif func_name == "write_file":
+		output = write_file(**arguments)
+	elif func_name == "run_python_file":
+		output = run_python_file(**arguments)
+	else:
+		output = "Error: non valid function was called"	
+	
+	return output
 
 def print_verbose(user_prompt, response):
 	meta = response.usage_metadata
