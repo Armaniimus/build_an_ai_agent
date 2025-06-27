@@ -7,9 +7,11 @@ def get_files_info(working_directory, directory=None):
 		absolute_directory = os.path.abspath(joined_path)
 
 		if not os.path.isdir(absolute_working_directory):
-			return f'Error: "{working_directory}" is not a directory'
+			print(os.listdir(absolute_working_directory))
+			return f'Error: "{working_directory}" is not a directory that can be used as the working directory'
+			
 		elif not os.path.isdir(absolute_directory):
-			return f'Error: "{directory}" is not a directory'
+			return f'Error: "{directory}" is not a directory that can be used'
 		elif not absolute_directory.startswith(absolute_working_directory):
 			return f'Error: Cannot list "{directory}" as it is outside the permitted working directory'
 		
